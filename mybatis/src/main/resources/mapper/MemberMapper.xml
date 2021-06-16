@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ksmart39.mybatis.dao.MemberMapper">
+			
+	<resultMap type="Member" id="memberResultMap">
+		<result property="memberId" 		column="m_id"/>
+		<result property="memberPw" 		column="m_pw"/>
+		<result property="memberName" 		column="m_name"/>
+		<result property="memberLevel"		column="m_level"/>
+		<result property="memberEmail"		column="m_email"/>
+		<result property="memberAddr" 		column="m_addr"/>
+		<result property="memberRegDate"	column="m_reg_date"/>
+		
+	</resultMap>
+	
+	<delete id="removeLoginById" parameterType="String">
+		DELETE 
+		FROM 
+			tb_login 
+		WHERE 
+			login_id= #{memberId};
+	</delete>
+	<delete id="removeOrderById" parameterType="String">
+		DELETE 
+		FROM 
+			tb_order 
+		WHERE 
+			o_id=#{memberId};
+	</delete>
+	<delete id="removeOrderSellerById" parameterType="String">
+		DELETE
+		o
+		FROM
+			tb_goods AS g
+			INNER join
+			tb_order AS o
+			on
+			g.g_code = o.o_g_code
+		WHERE 
+			g.g_seller_id =#{memberId};
+	</delete>
+	
+	<delete id="removeGoodsById" parameterType="String">
+		DELETE 
+		FROM 
+			tb_goods 
+		WHERE 
+			g_seller_id = #{memberId};	
+	</delete>
+	
+	<delete id="removeMemberById" parameterType="String">
+		DELETE 
+		FROM 
+			tb_member 
+		WHERE 
+			m_id=#{memberId};	
+	</delete>
+	
+	<insert id="addMember" parameterType="Member">
+		INSERT INTO tb_member
+		(m_id
+		, m_pw
+		, m_name
+		, m_level
+		, m_email
+		, m_addr
+		, m_reg_date
+		)VALUES (
+		#{memberId}
+		, #{memberPw}
+		, #{memberName}
+		, #{memberLevel}
+		, #{memberAddr}
+		, #{memberEmail}
+		, CURDATE())
+	</insert>
+	
+	<update id="modifyMember" parameterType="Member">
+		UPDATE tb_member
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="memberPw != null and memberPw != ''.toString()">
+				m_pw= #{memberPw}
+			</if>
+			<if test="memberName != null and memberName != ''.toString()">
+				,m_name= #{memberName}
+			</if>
+			<if test="memberLevel != null and memberLevel != ''.toString()">
+				,m_level= #{memberLevel}
+			</if>
+			<if test="memberAddr != null and memberAddr != ''.toString()">
+				,m_addr= #{memberAddr}
+			</if>
+			<if test="memberEmail != null and memberEmail != ''.toString()">
+				,m_email= #{memberEmail} 
+			</if>
+		</trim>
+		WHERE 
+			m_id = #{memberId};
+	</update>
+	
+	<select id="getmemberInfoById" parameterType="String" resultMap="memberResultMap"><!-- resultMap="위에 선언해놓았던 id명" parameterType은 MemberMapper.java에서 설정해놓은 값-->
+		SELECT 
+			m_id			
+			,m_pw			
+			,m_name		
+			,m_level	
+			,m_email		
+			,m_addr		
+			,m_reg_date		
+		FROM 
+			tb_member AS m
+		where 
+			m.m_id = #{memberId};
+	</select>
+	
+	<select id="getMemberList" parameterType="map" resultType="Member"  fetchSize="1000"><!-- db에 있는 정보들을 fetchSize 설정을 안했을 때 10개씩 가져온다. 쿼리속도가 빨라진다. 최적화하는 방법-->
+		SELECT 
+			m_id			AS memberId
+			,m_pw			AS memberPw
+			,m_name			AS memberName
+			,m_level		AS memberLevel
+			,m_email		AS memberEmail
+			,m_addr			AS memberAddr
+			,m_reg_date		AS memberRegDate
+		FROM 
+			tb_member
+			<trim prefix="WHERE" prefixOverrides="AND |OR ">
+				<if test="searchKey != null and searchKey != ''.toString()">
+					${searchKey} LIKE CONCAT('%',#{searchValue},'%');
+				</if>
+			</trim>
+	</select>
+</mapper>

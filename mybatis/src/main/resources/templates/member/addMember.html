@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html xmlns:th="http:www.thymeleaf.org"
+	  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	  layout:decorate="@{layout/default}">
+
+<th:block layout:fragment="customTitle">
+	<title th:text="${title}"></title>
+</th:block>		
+
+<th:block layout:fragment="customJs">
+	<script>
+		$(function(){
+			$('#idCheckBtn').click(function(){
+// 				alert('중복체크 버튼입니다.');
+				var memberId = $('input[name="memberId"]').val();
+				console.log('memberId : ' + memberId);
+				
+				if(memberId != '' && memberId != undefined && memberId != null){
+					var request = $.ajax({
+					url: "/memberIdCheck",		
+					method: "POST",			
+					data: { memberId : memberId },		
+					dataType: "json"		
+				});
+				//서버 요청 후 응답이 정상적으로 되었을 경우 실행되는 메서드
+				request.done(function(data){
+					console.log(data);
+					if(data){
+						$('#addMemberForm input').prop('disabled',false);
+						$('#addMemberForm select').prop('disabled',false);
+						$('#addMemberForm button').prop('disabled',false);
+					}else{
+						alert("중복된 아이디입니다.");
+						$('input[name="memberId"]').focus();
+					}
+				});
+				//서버 요청 후 응답이 정상적이지 않았을 경우 실행되는 메서드
+				request.fail(function( jqXHR, textStatus ) {
+					alert( "Request failed: " + textStatus );
+				});
+				}
+			});
+			
+			$('#addMemberBtn').click(function(){
+					//특수문자 / 문자 / 숫자 포함 형태의 8~15자리 이내의 암호 정규식
+				var regexPw = /^.*(?=^.{8,15}$)(?=.*\d)(?=.*[a-zA-Z])(?=.*[!@#$%^&+=]).*$/;
+				var regexEmail =/^[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*.[a-zA-Z]{2,3}$/i;
+				var submitFlag = true;
+				var memberForm = $('#addMemberForm');
+				var inputObj = memberForm.find('input');
+				
+				$.each(inputObj, function(e){
+					
+				var inputName = $(this).attr('name');
+				var inputValue = $(this).val();
+				var inputLabel = $(this).parent().parent().children().eq(0).text();
+				if(inputName == 'memberPw'){
+					if(!regexPw.test(inputValue)){
+						alert(inputLabel + "을 다시 입력해주세요")
+						$(this).focus();
+						submitFlag = false;
+						return submitFlag;
+					}
+				}else if(inputName == 'memberEmail'){
+					if(!regexEmail.test(inputValue)){
+						alert(inputLabel + "을 다시 입력해주세요")
+						$(this).focus();
+						submitFlag = false;
+						return submitFlag;
+					}
+				}else if(inputValue == '' || inputValue == undefined || inputValue == null){
+					if(!regexPw.test(inputValue)){
+						alert(inputLabel + "을 입력해주세요")
+						submitFlag = false;
+						return submitFlag;
+					}
+				}
+			});
+			if(submitFlag) memberForm.submit();
+		});
+	});
+			
+	</script>
+</th:block>
+
+<th:block layout:fragment="customContent">
+<!-- <form th:action="@{/addMember}"> -->
+<!-- <form action="/addMember"> -->
+	<form id="addMemberForm" th:action="@{/addMember}" method="post">
+		
+		<table border="1">
+			<tr>
+				<td>아이디</td>
+				<td>
+					<input type="text" name="memberId" placeholder="회원아이디를 입력해주세요." />
+					<button type="button" id="idCheckBtn" >중복체크</button>
+				</td>
+			</tr>
+			<tr>
+				<td>패스워드</td>
+				<td>
+					<input type="text" name="memberPw" placeholder="비밀번호를 입력해주세요."  disabled="disabled"/>
+				</td>
+			</tr>
+			<tr>
+				<td>이름</td>
+				<td>
+					<input type="text" name="memberName" placeholder="이름을 입력해주세요."  disabled="disabled"/>
+				</td>
+			</tr>
+			<tr>
+				<td>권한</td>
+				<td>
+					<select name="memberLevel"style="width: 100%"  disabled="disabled">
+						<option value="1">관리자</option>
+						<option value="2">판매자</option>
+						<option value="3">구매자</option>
+					</select>
+				</td>
+			</tr>
+			<tr>
+				<td>주소</td>
+				<td>
+					<input type="text" name="memberAddr" placeholder="주소를 입력해주세요." disabled="disabled"/>
+				</td>
+			</tr>
+			<tr>
+				<td>이메일</td>
+				<td>
+					<input type="text" name="memberEmail" placeholder="이메일을 입력해주세요." disabled="disabled"/>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="2">
+					<button type="button" id="addMemberBtn" disabled="disabled"style="width: 100%">회원가입</button>
+				</td>
+			</tr>
+		
+		</table>
+	</form>
+</th:block>
+</html>

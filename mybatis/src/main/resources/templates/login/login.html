@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http:www.thymeleaf.org"
+	  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	  layout:decorate="@{layout/default}">
+
+<th:block layout:fragment="customTitle">
+	<title th:text="${title}"></title>
+</th:block>		
+
+<th:block layout:fragment="customContent">
+<!-- <form th:action="@{/addMember}"> -->
+<!-- <form action="/addMember"> -->
+	<form th:action="@{/login}" method="post">
+		
+		<table border="1">
+			<tr>
+				<td>아이디</td>
+				<td>
+					<input type="text" name="memberId" placeholder="회원아이디를 입력해주세요."/>
+				</td>
+			</tr>
+			<tr>
+				<td>패스워드</td>
+				<td>
+					<input type="text" name="memberPw" placeholder="비밀번호를 입력해주세요."/>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="2">
+					<button type="submit" style="width: 100%">회원 로그인</button>
+				</td>
+			</tr>
+		
+		</table>
+	</form>
+		<h1 th:if="${loginResult != null}" th:text="${loginResult}"></h1>
+</th:block>
+</html>
